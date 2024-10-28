@@ -1,4 +1,7 @@
 == Changelog ==
+= 5.7.43 =
+* update libraries
+
 = 5.7.42 =
 * rearrange Amount options to  be more usable
 
