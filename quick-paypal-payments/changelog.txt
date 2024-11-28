@@ -1,4 +1,7 @@
 == Changelog ==
+= 5.7.44 =
+* remove admin javascript undefined variable issue
+
 = 5.7.43 =
 * update libraries
 

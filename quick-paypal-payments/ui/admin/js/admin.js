@@ -50,7 +50,9 @@
 			var fixedAmountChecked = $("input[name='fixedamount']").is(':checked');
 
 			// Check if there's a comma in the input value
-			var containsComma = $("input[name='inputamount']").val().includes(',');
+			var inputVal = $("input[name='inputamount']").val();
+			var containsComma = inputVal && inputVal.includes(',');
+
 
 			if (fixedAmountChecked && containsComma) {
 				$(".qpp_option_list_settings").show();

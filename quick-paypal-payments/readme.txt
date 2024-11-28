@@ -2,7 +2,7 @@
 Contributors: Fullworks
 Tags: paypal payment form, paypal, payments
 Tested up to: 6.7
-Stable tag: 5.7.43
+Stable tag: 5.7.44
 Type: freemium
 
 Zero to PayPal with just one shortcode. Jam packed with features and options with easy to use custom settings.
@@ -83,6 +83,9 @@ If it all goes wrong, just reinstall the plugin and start again. If you need hel
 You can report security bugs through the Patchstack Vulnerability Disclosure Program. The Patchstack team help validate, triage and handle any security vulnerabilities. [Report a security vulnerability.](https://patchstack.com/database/vdp/quick-paypal-payments)
 
 == Changelog ==
+= 5.7.44 =
+* remove admin javascript undefined variable issue
+
 = 5.7.43 =
 * update libraries
 
