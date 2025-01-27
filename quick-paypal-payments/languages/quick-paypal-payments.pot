@@ -1,4 +1,4 @@
-# Copyright (C) 2024 quick-paypal-payments
+# Copyright (C) 2025 quick-paypal-payments
 # This file is distributed under the same license as the quick-paypal-payments package.
 msgid ""
 msgstr ""
@@ -6,7 +6,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2024-11-28 15:49+0000\n"
+"POT-Creation-Date: 2025-01-27 10:44+0000\n"
 "X-Poedit-Basepath: ..\n"
 "X-Poedit-KeywordsList: __;_e;_ex:1,2c;_n:1,2;_n_noop:1,2;_nx:1,2,4c;_nx_noop:1,2,3c;_x:1,2c;esc_attr__;esc_attr_e;esc_attr_x:1,2c;esc_html__;esc_html_e;esc_html_x:1,2c\n"
 "X-Poedit-SearchPath-0: .\n"
@@ -1150,19 +1150,19 @@ msgstr ""
 msgid "Consent NOT Given"
 msgstr ""
 
-#: quick-paypal-payments/legacy/quick-paypal-payments.php:2506
+#: quick-paypal-payments/legacy/quick-paypal-payments.php:2486
 msgid "DEPRECATION NOTICE"
 msgstr ""
 
-#: quick-paypal-payments/legacy/quick-paypal-payments.php:2508
+#: quick-paypal-payments/legacy/quick-paypal-payments.php:2488
 msgid "This is a legacy Widget and is limited in functionality and may be withdrawn in the future"
 msgstr ""
 
-#: quick-paypal-payments/legacy/quick-paypal-payments.php:2510
+#: quick-paypal-payments/legacy/quick-paypal-payments.php:2490
 msgid "Replace with a shortcode e.g. [qpp form=myform]"
 msgstr ""
 
-#: quick-paypal-payments/legacy/quick-paypal-payments.php:2710, quick-paypal-payments/legacy/settings.php:2038
+#: quick-paypal-payments/legacy/quick-paypal-payments.php:2690, quick-paypal-payments/legacy/settings.php:2038
 msgid "Amount"
 msgstr ""
 

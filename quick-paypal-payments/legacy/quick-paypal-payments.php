@@ -5,6 +5,7 @@
 */
 use Quick_Paypal_Payments\Core\Utilities;
 include 'WPHttp.class.php';
+require_once plugin_dir_path( __FILE__ ) . 'functions/qpp_block.php';
 function qpp_shutdown() {
     $error = error_get_last();
 }
@@ -37,20 +38,6 @@ global $quick_paypal_payments_fs;
 if ( is_admin() ) {
     require_once plugin_dir_path( __FILE__ ) . '/settings.php';
 }
-function qpp_block_init() {
-    if ( !function_exists( 'register_block_type' ) ) {
-        return;
-    }
-    // Register our block editor script.
-    wp_register_script( 'qpp_block', plugins_url( 'block.js', __FILE__ ), array('wp-blocks', 'wp-element', 'wp-components') );
-    // Register our block, and explicitly define the attributes we accept.
-    register_block_type( 'quick-paypal-payments/block', array(
-        'editor_script'   => 'qpp_block',
-        'render_callback' => 'qpp_loop',
-    ) );
-}
-
-add_action( 'init', 'qpp_block_init' );
 /*
 	Function which displays registered scripts
 	ONLY IF $qpp_shortcode_exists EXISTS

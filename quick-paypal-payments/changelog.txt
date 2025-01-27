@@ -1,4 +1,10 @@
 == Changelog ==
+= 5.7.46 =
+* Update Libraries
+
+= 5.7.45 =
+* move block registration to avoid conflict with other plugins
+
 = 5.7.44 =
 * remove admin javascript undefined variable issue
 
