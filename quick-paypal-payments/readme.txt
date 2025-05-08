@@ -1,8 +1,8 @@
 === Quick Paypal Payments ===
 Contributors: Fullworks
 Tags: paypal payment form, paypal, payments
-Tested up to: 6.7
-Stable tag: 5.7.46
+Tested up to: 6.8
+Stable tag: 5.7.47
 Type: freemium
 
 Zero to PayPal with just one shortcode. Jam packed with features and options with easy to use custom settings.

@@ -711,7 +711,7 @@ function qpp_form_options(  $id  ) {
         'id'     => '',
         'amount' => '',
     );
-    $content .= qpp_loop( $args );
+    $content .= qpp_loop( $args, true );
     $content .= '<p>There are some more examples of payment forms <a href="https://fullworks.net/docs/quick-paypal-payments/demos-quick-paypal-payments/" target="_blank">on this page</a>.</p>
     <p>And there are loads of shortcode options <a href="https://fullworks.net/docs/quick-paypal-payments/usage-quick-paypal-payments/shortcode-reference/" target="_blank">on this page</a>.</p>
     </div></div>';
@@ -1052,7 +1052,7 @@ function qpp_styles(  $id  ) {
         'id'     => '',
         'amount' => '',
     );
-    $content .= qpp_loop( $args );
+    $content .= qpp_loop( $args, true );
     $content .= '<p>There are some more examples of payment forms <a href="https://fullworks.net/docs/quick-paypal-payments/demos-quick-paypal-payments/" target="_blank">on this page</a>.</p>
     <p>And there are loads of shortcode options <a href="https://fullworks.net/docs/quick-paypal-payments/usage-quick-paypal-payments/shortcode-reference/" target="_blank">on this page</a>.</p>
     </div></div>';
@@ -1222,7 +1222,7 @@ function qpp_send_page(  $id  ) {
         'id'     => '',
         'amount' => '',
     );
-    $content .= qpp_loop( $args );
+    $content .= qpp_loop( $args, true );
     $content .= '<p>There are some more examples of payment forms <a href="https://fullworks.net/docs/quick-paypal-payments/demos-quick-paypal-payments/" target="_blank">on this page</a>.</p>
     <p>And there are loads of shortcode options <a href="https://fullworks.net/docs/quick-paypal-payments/usage-quick-paypal-payments/shortcode-reference/" target="_blank">on this page</a>.</p>
     </div></div>';
@@ -1282,7 +1282,7 @@ function qpp_error_page(  $id  ) {
         'id'     => '',
         'amount' => '',
     );
-    $content .= qpp_loop( $args );
+    $content .= qpp_loop( $args, true );
     $content .= '<p>There are some more examples of payment forms <a href="https://fullworks.net/docs/quick-paypal-payments/demos-quick-paypal-payments/" target="_blank">on this page</a>.</p>
     <p>And there are loads of shortcode options <a href="https://fullworks.net/docs/quick-paypal-payments/usage-quick-paypal-payments/shortcode-reference/" target="_blank">on this page</a>.</p>
     </div></div>';
@@ -1643,7 +1643,7 @@ function qpp_address(  $id  ) {
         'id'     => '',
         'amount' => '',
     );
-    $content .= qpp_loop( $args );
+    $content .= qpp_loop( $args, true );
     $content .= '<p>There are some more examples of payment forms <a href="https://fullworks.net/docs/quick-paypal-payments/demos-quick-paypal-payments/" target="_blank">on this page</a>.</p>
     <p>And there are loads of shortcode options <a href="https://fullworks.net/docs/quick-paypal-payments/usage-quick-paypal-payments/shortcode-reference/" target="_blank">on this page</a>.</p>
     </div></div>';
@@ -1806,7 +1806,7 @@ function qpp_coupon_codes(  $id  ) {
         'id'     => '',
         'amount' => '',
     );
-    $content .= qpp_loop( $args );
+    $content .= qpp_loop( $args, true );
     $content .= '<p>There are some more examples of payment forms <a href="https://fullworks.net/docs/quick-paypal-payments/demos-quick-paypal-payments/" target="_blank">on this page</a>.</p>
     <p>And there are loads of shortcode options <a href="https://fullworks.net/docs/quick-paypal-payments/usage-quick-paypal-payments/shortcode-reference/" target="_blank">on this page</a>.</p>
     </div></div>';

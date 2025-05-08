@@ -74,7 +74,7 @@ function qpp_register_scripts() {
     wp_register_script(
         'qpp_script',
         plugins_url( 'payments.js', __FILE__ ),
-        array('jquery'),
+        array('jquery', 'wp-api-fetch'),
         QUICK_PAYPAL_PAYMENTS_VERSION,
         true
     );
@@ -103,6 +103,12 @@ function qpp_register_scripts() {
 function qpp_validate_form_callback(  $degrade = false  ) {
     if ( !wp_doing_ajax() ) {
         return;
+    }
+    if ( !isset( $_POST['qpp_payment_nonce'] ) || !wp_verify_nonce( $_POST['qpp_payment_nonce'], 'qpp_payment_form' ) ) {
+        wp_send_json_error( array(
+            'message' => 'Invalid nonce',
+        ) );
+        wp_die();
     }
     $sc = qpp_sanitize( $_POST['sc'] );
     $combine = isset( $_REQUEST['combine'] ) && 'checked' == $_REQUEST['combine'];
@@ -639,7 +645,7 @@ function qpp_get_total(  $a  ) {
     return $total;
 }
 
-function qpp_loop(  $atts  ) {
+function qpp_loop(  $atts, $from_admin_settings = false  ) {
     $qpp_setup = qpp_get_stored_setup();
     if ( !wp_script_is( 'qpp_script', 'registered' ) ) {
         qpp_register_scripts();
@@ -682,6 +688,12 @@ function qpp_loop(  $atts  ) {
         $id
     );
     if ( isset( $_POST['qppsubmit' . $form] ) || isset( $_POST['qppsubmit' . $form . '_x'] ) ) {
+        if ( !wp_verify_nonce( $_REQUEST['qpp_payment_nonce'], 'qpp_payment_form' ) ) {
+            die( 'Security check' );
+        }
+        if ( $from_admin_settings ) {
+            check_admin_referer( 'qpp_admin_form_nonce', 'qpp_admin_form_nonce' );
+        }
         $sc = qpp_sanitize( $_POST['sc'] );
         $combine = isset( $_REQUEST['combine'] ) && 'checked' == $_REQUEST['combine'];
         $itemamount = ( isset( $_REQUEST['itemamount'] ) ? sanitize_text_field( $_REQUEST['itemamount'] ) : 0 );
@@ -697,7 +709,8 @@ function qpp_loop(  $atts  ) {
                 $v,
                 $formerrors,
                 $form,
-                $atts
+                $atts,
+                $from_admin_settings
             );
         } else {
             if ( $amount ) {
@@ -736,7 +749,8 @@ function qpp_loop(  $atts  ) {
             $v,
             array(),
             $form,
-            $atts
+            $atts,
+            $from_admin_settings
         );
     }
     $output_string = ob_get_contents();
@@ -748,7 +762,8 @@ function qpp_display_form(
     $values,
     $errors,
     $id,
-    $attr = ''
+    $attr = '',
+    $from_admin_settings = false
 ) {
     /** @var \Freemius $quick_paypal_payments_fs Freemius global object. */
     global $quick_paypal_payments_fs;
@@ -892,6 +907,12 @@ function qpp_display_form(
     $content .= '<input type="hidden" name="form_id" value="' . $id . '" />';
     $content .= '<input type="hidden" name="currencybefore" value="' . $c['b'] . '" />';
     $content .= '<input type="hidden" name="currencyafter" value="' . $c['a'] . '" />';
+    $content .= wp_nonce_field(
+        'qpp_payment_form',
+        'qpp_payment_nonce',
+        true,
+        false
+    );
     /*
     	Labels
     */
@@ -1142,7 +1163,7 @@ function qpp_display_form(
                     }
                     $content .= '</p>';
                     $checked = 'checked';
-                    $ref = explode( ",", $values['recurring'] );
+                    $ref = explode( ",", $values['recurring'] ?? '' );
                 }
                 break;
             case 'field13':
@@ -1163,15 +1184,15 @@ function qpp_display_form(
                     foreach ( $arr as $item ) {
                         if ( $address[$item] ) {
                             if ( 'country' != $item ) {
-                                $required = ( $address['r' . $item] && !$errors[$item] ? ' class="required" ' : '' );
+                                $required = ( ($address['r' . $item] ?? false) && !$errors[$item] ? ' class="required" ' : '' );
                                 $content .= qpp_nice_label(
                                     $item . $id,
                                     $item,
                                     'text',
-                                    $address[$item],
+                                    $address[$item] ?? '',
                                     $label,
-                                    $required . $errors[$item],
-                                    $values[$item]
+                                    $required . ($errors[$item] ?? ''),
+                                    $values[$item] ?? ''
                                 );
                                 //$content .='<p><input type="text" id="'.$item.'" name="'.$item.'" '..' value="'.$values[$item].'" rel="' . $values[$item] . '" onfocus="qppclear(this, \'' . $values[$item] . '\')" onblur="qpprecall(this, \'' . $values[$item] . '\')"/></p>';
                             } else {
@@ -1278,6 +1299,14 @@ function qpp_display_form(
         $content .= '<p><input type="reset" value="' . $qpp['resetcaption'] . '" /></p>';
     }
     $content .= '<div id="qppchecking">' . $messages['validating'] . '</div>';
+    if ( $from_admin_settings ) {
+        $content .= wp_nonce_field(
+            "qpp_admin_form_nonce",
+            "qpp_admin_form_nonce",
+            true,
+            false
+        );
+    }
     $content .= '</form>' . "\r\t";
     wp_add_inline_script( 'qpp_script', 'to_list.push("#frmPayment' . (( $id ? $id : 'default' )) . '");', 'after' );
     $content .= "<div class='qpp-loading'>" . $send['waiting'] . "</div>";
@@ -1406,12 +1435,7 @@ function qpp_amount_choice(  $type, $data  ) {
     $set = $data['amount']['value'];
     $currency = $data['currency'];
     $other = $data['other'];
-    $otherinput = <<<other
-<div id="otheramount">
-<input type="text" label="{$other['instruction']}" placeholder="{$other['instruction']}"  name="otheramount" style="display: none;" />
-</div>
-<input type="hidden" name="use_other_amount" value="false" />
-other;
+    $otherinput = '<div id="otheramount">' . '<input type="text" label="' . ($other['instruction'] ?? '') . '" placeholder="' . ($other['instruction'] ?? '') . '"  name="otheramount" style="display: none;" />' . '</div>' . '<input type="hidden" name="use_other_amount" value="false" />';
     $returning = "";
     if ( $other['use'] ) {
         $choices[] = 'other';

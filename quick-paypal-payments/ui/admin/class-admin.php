@@ -46,6 +46,27 @@ class Admin {
         add_action( 'admin_notices', array($this, 'admin_notice_freemius') );
         add_action( 'init', array($this, 'generate_freemius_licence') );
         update_option( 'qpp_legacy_free', true );
+        // Add AJAX endpoint for refreshing nonces
+        add_action( 'wp_ajax_qpp_refresh_nonce', array($this, 'refresh_nonce_callback') );
+        add_action( 'wp_ajax_nopriv_qpp_refresh_nonce', array($this, 'refresh_nonce_callback') );
+    }
+
+    /**
+     * AJAX callback to refresh the form submission nonce
+     */
+    public function refresh_nonce_callback() {
+        if ( !wp_doing_ajax() ) {
+            return;
+        }
+        // No nonce check here since we're actually getting a fresh nonce
+        // Generate a fresh nonce
+        $nonce = wp_create_nonce( 'qpp_payment_form' );
+        // Return the new nonce
+        wp_send_json_success( array(
+            'nonce' => $nonce,
+        ) );
+        // Make sure to exit properly
+        wp_die();
     }
 
     public function enqueue_styles() {

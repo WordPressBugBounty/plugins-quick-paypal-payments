@@ -6,7 +6,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2025-01-27 10:44+0000\n"
+"POT-Creation-Date: 2025-05-08 21:38+0000\n"
 "X-Poedit-Basepath: ..\n"
 "X-Poedit-KeywordsList: __;_e;_ex:1,2c;_n:1,2;_n_noop:1,2;_nx:1,2,4c;_nx_noop:1,2,3c;_x:1,2c;esc_attr__;esc_attr_e;esc_attr_x:1,2c;esc_html__;esc_html_e;esc_html_x:1,2c\n"
 "X-Poedit-SearchPath-0: .\n"
@@ -1150,19 +1150,19 @@ msgstr ""
 msgid "Consent NOT Given"
 msgstr ""
 
-#: quick-paypal-payments/legacy/quick-paypal-payments.php:2486
+#: quick-paypal-payments/legacy/quick-paypal-payments.php:2501
 msgid "DEPRECATION NOTICE"
 msgstr ""
 
-#: quick-paypal-payments/legacy/quick-paypal-payments.php:2488
+#: quick-paypal-payments/legacy/quick-paypal-payments.php:2503
 msgid "This is a legacy Widget and is limited in functionality and may be withdrawn in the future"
 msgstr ""
 
-#: quick-paypal-payments/legacy/quick-paypal-payments.php:2490
+#: quick-paypal-payments/legacy/quick-paypal-payments.php:2505
 msgid "Replace with a shortcode e.g. [qpp form=myform]"
 msgstr ""
 
-#: quick-paypal-payments/legacy/quick-paypal-payments.php:2690, quick-paypal-payments/legacy/settings.php:2038
+#: quick-paypal-payments/legacy/quick-paypal-payments.php:2705, quick-paypal-payments/legacy/settings.php:2038
 msgid "Amount"
 msgstr ""
 
@@ -1266,7 +1266,7 @@ msgstr ""
 msgid "Description"
 msgstr ""
 
-#: quick-paypal-payments/ui/admin/class-admin.php:175
+#: quick-paypal-payments/ui/admin/class-admin.php:199
 msgid ""
 "%1$s<strong>Important action required - Your licence request was successful</strong>. <p>you MUST take action now!!<br>\n"
 " You have requested the Pro GOLD plugin free offer, please install it. Don't worry it is easy.\n"
@@ -1277,7 +1277,7 @@ msgid ""
 "</p>"
 msgstr ""
 
-#: quick-paypal-payments/ui/admin/class-admin.php:166
+#: quick-paypal-payments/ui/admin/class-admin.php:190
 msgid ""
 "%1$s<strong>Important NOTICE for FREE users of this plugin</strong>. %2$s<p>Version 6 of the plugin will have some features that are free today as paid only, this is necessary to be able to continue to support the free version.\n"
 "</p><p> \n"
@@ -1286,7 +1286,7 @@ msgid ""
 "<a target=\"_blank\" href=\"%4$s\" class=\"button\" >CLICK HERE TO GET YOUR DOWNLOAD AND LICENCE BY EMAIL</a>"
 msgstr ""
 
-#: quick-paypal-payments/ui/admin/class-admin.php:146
+#: quick-paypal-payments/ui/admin/class-admin.php:170
 msgid ""
 "%1$s<strong>Important action required - Your licence request was successful</strong>. <p>Big changes are coming to Quick PayPal Payments  and you MUST take action now to keep your premium features!!<br>\n"
 " You have requested the PREMIUM plugin, please install it to keep your premium features. Don't worry it is easy.\n"
@@ -1297,7 +1297,7 @@ msgid ""
 "</p>"
 msgstr ""
 
-#: quick-paypal-payments/ui/admin/class-admin.php:134
+#: quick-paypal-payments/ui/admin/class-admin.php:158
 msgid ""
 "%1$s<strong>Important action required</strong>. %2$s<p>Big changes are coming to Quick PayPal Payments and you MUST take action now to keep your premium features!!<br>\n"
 " You will need to <strong>download and install the PREMIUM</strong> plugin to keep your premium features. Don't worry it is easy.</p>\n"
@@ -1306,7 +1306,7 @@ msgid ""
 "<p>The email will be sent to <strong>%4$s</strong> If you don't get the email soon, check your spam </p><p>To be clear if you already have paid for the Pro version - you do not have to pay again</p>"
 msgstr ""
 
-#: quick-paypal-payments/ui/admin/class-admin.php:117
+#: quick-paypal-payments/ui/admin/class-admin.php:141
 msgid ""
 "%1$s<strong>Important action required - Your Pro Install was successful - but you need to activate your licence</strong>. <p>Big changes are coming to Quick PayPal Payments  and you MUST take action now to keep your premium features!!<br>\n"
 " You have installed the PREMIUM plugin, but have not activated your <strong>licence</strong>. Don't worry it is easy.\n"
@@ -1315,6 +1315,6 @@ msgid ""
 "</p>"
 msgstr ""
 
-#: quick-paypal-payments/ui/admin/class-admin.php:206
+#: quick-paypal-payments/ui/admin/class-admin.php:230
 msgid "Security check invalid, expired or missing"
 msgstr ""
