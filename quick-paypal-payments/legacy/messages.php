@@ -1,4 +1,9 @@
 <?php
+// Prevent direct access.
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /** @var \Freemius $quick_paypal_payments_fs Freemius global object. */
 global $quick_paypal_payments_fs;
 // remove freemius tabs from this page
@@ -9,7 +14,7 @@ $quick_paypal_payments_fs->add_filter( 'is_submenu_visible', function ( $is_visi
 
 $qpp_setup = qpp_get_stored_setup();
 $tabs      = explode( ",", $qpp_setup['alternative'] );
-$firsttab  = reset( $tabs );
+$qpp_firsttab  = reset( $tabs );
 echo '<div class="wrap">';
 echo '<h1>Quick Paypal Payments</h1>';
 // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- No action, nonce is not required
@@ -19,8 +24,8 @@ if ( isset ( $_GET['tab'] ) ) {
 	qpp_messages_admin_tabs( $tab );
 
 } else {
-	qpp_messages_admin_tabs( $firsttab );
-	$tab = $firsttab;
+	qpp_messages_admin_tabs( $qpp_firsttab );
+	$tab = $qpp_firsttab;
 }
 qpp_show_messages( $tab );
 echo '</div>';
@@ -57,10 +62,19 @@ function qpp_show_messages( $id ) {
 		if ( $id == '' ) {
 			$title = 'Default';
 		}
-		$title       = 'Payment List for ' . $title . ' as at ' . date( 'j M Y' );
-		$sendtoemail = $_POST['sendtoemail'];
-		$headers     = "From: {<{$sendtoemail}>\r\n"
-		               . "Content-Type: text/html; charset=\"utf-8\"\r\n";
+		$title       = 'Payment List for ' . $title . ' as at ' . wp_date( 'j M Y' );
+		$sendtoemail = sanitize_email( wp_unslash( $_POST['sendtoemail'] ) );
+
+		if ( ! is_email( $sendtoemail ) ) {
+			qpp_admin_notice( 'That is not a valid email address, nothing was sent.' );
+
+			return;
+		}
+
+		// sanitize_email() strips the CR/LF that would otherwise let a crafted
+		// address inject extra mail headers here.
+		$headers = 'From: <' . $sendtoemail . '>' . "\r\n"
+		           . 'Content-Type: text/html; charset="utf-8"' . "\r\n";
 		qpp_wp_mail( 'Message Email', $sendtoemail, $title, $content, $headers );
 		qpp_admin_notice( 'Message list has been sent to ' . $sendtoemail . '.' );
 	}
@@ -91,7 +105,7 @@ function qpp_show_messages( $id ) {
 		if ( $message !== false ) {
 			$count = count( $message );
 			for ( $i = 0; $i <= $count; $i ++ ) {
-				if ( $_POST[ $i ] == 'checked' ) {
+				if ( isset( $_POST[ $i ] ) && 'checked' === sanitize_text_field( wp_unslash( $_POST[ $i ] ) ) ) {
 					unset( $message[ $i ] );
 				}
 			}
@@ -160,5 +174,5 @@ function qpp_show_messages( $id ) {
         <p>Click to find out more</p>' . wp_kses_post( $upmsg ) . '
         </a></div>';
 	}
-	echo $dashboard;
+	echo wp_kses( $dashboard, qpp_allowed_html() );
 }

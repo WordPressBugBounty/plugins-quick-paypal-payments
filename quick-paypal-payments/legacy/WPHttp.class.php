@@ -1,6 +1,11 @@
 <?php
-	if (!class_exists('WPHttp')) {
-		class WPHttp {
+
+// Prevent direct access.
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+	if (!class_exists('QPP_WPHttp')) {
+		class QPP_WPHttp {
 			public $response;
 			
 			private $args			= ['method' => 'POST'];
