@@ -33,6 +33,7 @@ require_once __DIR__ . '/ipn-verification.php';
 require_once __DIR__ . '/shortcode-attributes.php';
 require_once __DIR__ . '/recurring-times.php';
 require_once __DIR__ . '/form-name.php';
+require_once __DIR__ . '/output-escaping.php';
 add_action( 'wp_head', 'qpp_head_css' );
 add_action( 'wp_ajax_qpp_validate_form', 'qpp_validate_form_callback' );
 add_action( 'wp_ajax_nopriv_qpp_validate_form', 'qpp_validate_form_callback' );
@@ -969,7 +970,8 @@ function qpp_loop(  $atts, $from_admin_settings = false  ) {
     }
     $output_string = ob_get_contents();
     ob_end_clean();
-    return $output_string;
+    // Square brackets are written as character references (output-escaping.php).
+    return qpp_inert_shortcodes( $output_string );
 }
 
 function qpp_display_form(
@@ -1185,7 +1187,7 @@ function qpp_display_form(
                             $content .= qpp_reference_choice( $qpp['refselector'], $data );
                             break;
                         case 'text':
-                            $content .= '<p class="input" >' . $qpp['shortcodereference'] . ' ' . $data['reference']['value'] . '</p><input type="hidden" name="reference" value="' . esc_attr( $data['reference']['value'] ) . '" />';
+                            $content .= '<p class="input" >' . $qpp['shortcodereference'] . ' ' . qpp_esc_visitor_html( $data['reference']['value'] ) . '</p><input type="hidden" name="reference" value="' . esc_attr( $data['reference']['value'] ) . '" />';
                             break;
                         case 'input':
                             $required = ( !qpp_get_element( $errors, 'reference', false ) ? ' class="required" ' : '' );
@@ -1213,7 +1215,8 @@ function qpp_display_form(
                          * the item number should be. Nothing to show means show nothing.
                          */
                         if ( '' !== trim( (string) $values['stock'] ) && $values['stock'] !== $qpp['stocklabel'] ) {
-                            $content .= '<p class="input" >' . $values['stock'] . '</p>';
+                            // The item number can come from the link, so it is the visitor's text.
+                            $content .= '<p class="input" >' . qpp_esc_visitor_html( $values['stock'] ) . '</p>';
                         }
                     } else {
                         $content .= qpp_nice_label(
@@ -1354,9 +1357,9 @@ function qpp_display_form(
             case 'field9':
                 $content .= '<input type="hidden" name="couponapplied" value="' . qpp_get_element( $values, 'couponapplied' ) . '" />';
                 if ( $qpp['usecoupon'] && $values['coupon'] ) {
-                    $content .= '<input type="hidden" name="couponblurb" value="' . $values['coupon']['code'] . '" />';
-                    $content .= '<input type="hidden" name="coupontype" value="' . $values['coupon']['type'] . '" />';
-                    $content .= '<input type="hidden" name="couponvalue" value="' . $values['coupon']['value'] . '" />';
+                    $content .= '<input type="hidden" name="couponblurb" value="' . qpp_esc_visitor_attr( $values['coupon']['code'] ) . '" />';
+                    $content .= '<input type="hidden" name="coupontype" value="' . esc_attr( $values['coupon']['type'] ) . '" />';
+                    $content .= '<input type="hidden" name="couponvalue" value="' . esc_attr( $values['coupon']['value'] ) . '" />';
                 }
                 if ( $qpp['usecoupon'] && qpp_get_element( $values, 'couponapplied' ) != 'checked' ) {
                     if ( $values['couponerror'] ) {
@@ -2458,7 +2461,7 @@ function qpp_process_form(
      * same site still go to Stripe.
      */
     $qpp_stripe = qpp_get_stored_stripe();
-    if ( !$qpp['userecurring'] && 'checked' === $qpp_stripe['enable'] && !empty( $qpp_stripe['secret_key'] ) && function_exists( 'qpp_stripe_create_session' ) ) {
+    if ( !$qpp['userecurring'] && 'checked' === $qpp_stripe['enable'] && !empty( $qpp_stripe['secret_key'] ) && function_exists( 'qpp_stripe_create_session' ) && function_exists( 'qpp_stripe_build_session_args' ) ) {
         $stripe_reference = wp_strip_all_tags( $payment->reference );
         if ( (int) $payment->quantity > 1 ) {
             $stripe_reference .= ' (x' . (int) $payment->quantity . ')';
@@ -2960,7 +2963,8 @@ function qpp_report(  $atts  ) {
     extract( shortcode_atts( array(
         'form' => '',
     ), $atts ) );
-    return qpp_messagetable( qpp_sanitize_form_name( $form ), '', 'public' );
+    // The table shows what buyers entered, so it is printed like the form.
+    return qpp_inert_shortcodes( qpp_messagetable( qpp_sanitize_form_name( $form ), '', 'public' ) );
 }
 
 /**
@@ -3561,16 +3565,16 @@ function qpp_send_confirmation(  $values, $form  ) {
         $multiple = '<table><tr><th>' . esc_html__( 'Item', 'quick-paypal-payments' ) . '</th><th>' . esc_html__( 'Qty', 'quick-paypal-payments' ) . '</th></tr>';
         foreach ( $values['items'] as $k => $item ) {
             if ( $item['quantity'] ) {
-                $multiple .= '<tr><td>' . $item['item_name'] . '</td><td>' . $item['quantity'] . '</td></tr>';
+                $multiple .= '<tr><td>' . esc_html( $item['item_name'] ) . '</td><td>' . esc_html( $item['quantity'] ) . '</td></tr>';
             }
         }
         $multiple .= '</table>';
         $details .= $multiple;
     } else {
-        $details .= '<p>' . $ref . $rcolon . $values['reference'] . '</p>
-        <p>' . $qpp['quantitylabel'] . ': ' . $values['quantity'];
+        $details .= '<p>' . $ref . $rcolon . esc_html( $values['reference'] ) . '</p>
+        <p>' . $qpp['quantitylabel'] . ': ' . esc_html( $values['quantity'] );
         if ( $values['quantity'] > 1 ) {
-            $details .= ' @ ' . $c['b'] . $values['amount'] . $c['a'] . ' each';
+            $details .= ' @ ' . $c['b'] . esc_html( $values['amount'] ) . $c['a'] . ' each';
         }
         $details .= '</p>';
     }
@@ -3597,14 +3601,14 @@ function qpp_send_confirmation(  $values, $form  ) {
     $content = '<p>' . $auto['message'] . '</p>';
     $content = str_replace( '<p><p>', '<p>', $content );
     $content = str_replace( '</p></p>', '</p>', $content );
-    $content = str_replace( '[firstname]', $values['firstname'], $content );
-    $content = str_replace( '[name]', $values['firstname'] . ' ' . $values['lastname'], $content );
-    $content = str_replace( '[reference]', $values['reference'], $content );
-    $content = str_replace( '[quantity]', $values['quantity'], $content );
+    $content = str_replace( '[firstname]', esc_html( $values['firstname'] ), $content );
+    $content = str_replace( '[name]', esc_html( $values['firstname'] . ' ' . $values['lastname'] ), $content );
+    $content = str_replace( '[reference]', esc_html( $values['reference'] ), $content );
+    $content = str_replace( '[quantity]', esc_html( $values['quantity'] ), $content );
     $content = str_replace( '[fullamount]', $fullamount, $content );
-    $content = str_replace( '[amount]', $values['amount'], $content );
-    $content = str_replace( '[stock]', $values['stock'], $content );
-    $content = str_replace( '[option]', $values['option1'], $content );
+    $content = str_replace( '[amount]', esc_html( $values['amount'] ), $content );
+    $content = str_replace( '[stock]', esc_html( $values['stock'] ), $content );
+    $content = str_replace( '[option]', esc_html( $values['option1'] ), $content );
     $content = str_replace( '[details]', $details, $content );
     if ( isset( $multiple ) ) {
         $content = str_replace( '[multiple]', $multiple, $content );
@@ -3627,16 +3631,16 @@ function qpp_send_confirmation(  $values, $form  ) {
         if ( $qpp['useaddress'] ) {
             $contentb .= '<h2>' . esc_html__( 'Personal Details', 'quick-paypal-payments' ) . '</h2>
             <table>
-            <tr><td>' . $address['email'] . '</td><td>' . $values['email'] . '</td></tr></tr>
-            <tr><td>' . $address['firstname'] . '</td><td>' . $values['firstname'] . '</td></tr>
-            <tr><td>' . $address['lastname'] . '</td><td>' . $values['lastname'] . '</td></tr>
-            <tr><td>' . $address['address1'] . '</td><td>' . $values['address1'] . '</td></tr>
-            <tr><td>' . $address['address2'] . '</td><td>' . $values['address2'] . '</td></tr>
-            <tr><td>' . $address['city'] . '</td><td>' . $values['city'] . '</td></tr>
-            <tr><td>' . $address['state'] . '</td><td>' . $values['state'] . '</td></tr>
-            <tr><td>' . $address['zip'] . '</td><td>' . $values['zip'] . '</td></tr>
-            <tr><td>' . $address['country'] . '</td><td>' . $values['country'] . '</td></tr>
-            <tr><td>' . $address['night_phone_b'] . '</td><td>' . $values['night_phone_b'] . '</td></tr>
+            <tr><td>' . $address['email'] . '</td><td>' . esc_html( $values['email'] ) . '</td></tr></tr>
+            <tr><td>' . $address['firstname'] . '</td><td>' . esc_html( $values['firstname'] ) . '</td></tr>
+            <tr><td>' . $address['lastname'] . '</td><td>' . esc_html( $values['lastname'] ) . '</td></tr>
+            <tr><td>' . $address['address1'] . '</td><td>' . esc_html( $values['address1'] ) . '</td></tr>
+            <tr><td>' . $address['address2'] . '</td><td>' . esc_html( $values['address2'] ) . '</td></tr>
+            <tr><td>' . $address['city'] . '</td><td>' . esc_html( $values['city'] ) . '</td></tr>
+            <tr><td>' . $address['state'] . '</td><td>' . esc_html( $values['state'] ) . '</td></tr>
+            <tr><td>' . $address['zip'] . '</td><td>' . esc_html( $values['zip'] ) . '</td></tr>
+            <tr><td>' . $address['country'] . '</td><td>' . esc_html( $values['country'] ) . '</td></tr>
+            <tr><td>' . $address['night_phone_b'] . '</td><td>' . esc_html( $values['night_phone_b'] ) . '</td></tr>
             </table>';
         }
         $content = '<html>' . $details . $contentb . '</html>';
@@ -3827,21 +3831,21 @@ function qpp_nice_label(
         switch ( $labelType ) {
             case 0:
                 $returning = '<div class="qpp_nice_label qpp_label_none">';
-                $returning .= '<input type="text" id="' . esc_attr( $id ) . '"' . $class . ' name="' . esc_attr( $name ) . '" value="' . esc_attr( $v ) . '" ' . $error . ' />';
+                $returning .= '<input type="text" id="' . esc_attr( $id ) . '"' . $class . ' name="' . esc_attr( $name ) . '" value="' . qpp_esc_visitor_attr( $v ) . '" ' . $error . ' />';
                 break;
             case 1:
                 $returning = '<div class="qpp_nice_label qpp_label_tiny">';
                 $returning .= '<label for="' . esc_attr( $id ) . '">' . $label . '</label>';
-                $returning .= '<input type="text" id="' . esc_attr( $id ) . '"' . $class . ' name="' . esc_attr( $name ) . '" value="' . esc_attr( $v ) . '" ' . $error . ' />';
+                $returning .= '<input type="text" id="' . esc_attr( $id ) . '"' . $class . ' name="' . esc_attr( $name ) . '" value="' . qpp_esc_visitor_attr( $v ) . '" ' . $error . ' />';
                 break;
             case 2:
                 $returning = '<div class="qpp_nice_label qpp_label_blur">';
-                $returning .= '<input type="text" id="' . esc_attr( $id ) . '"' . $class . ' name="' . esc_attr( $name ) . '"  ' . $error . ' value="' . esc_attr( $v ) . '" placeholder="' . esc_attr( $value ) . '" />';
+                $returning .= '<input type="text" id="' . esc_attr( $id ) . '"' . $class . ' name="' . esc_attr( $name ) . '"  ' . $error . ' value="' . qpp_esc_visitor_attr( $v ) . '" placeholder="' . qpp_esc_visitor_attr( $value ) . '" />';
                 break;
             case 3:
                 $returning = '<div class="qpp_nice_label qpp_label_line">';
                 $returning .= '<label for="' . esc_attr( $id ) . '">' . $label . '</label>';
-                $returning .= '<input type="text" id="' . esc_attr( $id ) . '"' . $class . ' name="' . esc_attr( $name ) . '" value="' . esc_attr( $v ) . '" ' . $error . ' />';
+                $returning .= '<input type="text" id="' . esc_attr( $id ) . '"' . $class . ' name="' . esc_attr( $name ) . '" value="' . qpp_esc_visitor_attr( $v ) . '" ' . $error . ' />';
                 break;
         }
     } elseif ( $type == 'textarea' ) {
@@ -3850,13 +3854,13 @@ function qpp_nice_label(
             case 0:
                 $v = ( $value == $label ? '' : $value );
                 $returning = '<div class="qpp_nice_label qpp_label_none">';
-                $returning .= '<textarea rows="4" label="message" id="' . esc_attr( $id ) . '" name="' . esc_attr( $name ) . '"' . $error . '>' . esc_textarea( stripslashes( $v ) ) . '</textarea>';
+                $returning .= '<textarea rows="4" label="message" id="' . esc_attr( $id ) . '" name="' . esc_attr( $name ) . '"' . $error . '>' . qpp_inert_shortcodes( esc_textarea( stripslashes( $v ) ) ) . '</textarea>';
                 break;
             case 1:
                 $v = ( $value == $label ? '' : $value );
                 $returning = '<div class="qpp_nice_label qpp_label_tiny">';
                 $returning .= '<label for="' . esc_attr( $id ) . '">' . $label . '</label>';
-                $returning .= '<textarea rows="4" label="message" id="' . esc_attr( $id ) . '" name="' . esc_attr( $name ) . '"' . $error . '>' . esc_textarea( stripslashes( $v ) ) . '</textarea>';
+                $returning .= '<textarea rows="4" label="message" id="' . esc_attr( $id ) . '" name="' . esc_attr( $name ) . '"' . $error . '>' . qpp_inert_shortcodes( esc_textarea( stripslashes( $v ) ) ) . '</textarea>';
                 break;
             case 2:
                 $returning = '<div class="qpp_nice_label qpp_label_blur">';
@@ -3866,7 +3870,7 @@ function qpp_nice_label(
                 $v = ( $value == $label ? '' : $value );
                 $returning = '<div class="qpp_nice_label qpp_label_line">';
                 $returning .= '<label for="' . esc_attr( $id ) . '">' . $label . '</label>';
-                $returning .= '<textarea rows="4" label="message" id="' . esc_attr( $id ) . '" name="' . esc_attr( $name ) . '"' . $error . '>' . esc_textarea( stripslashes( $v ) ) . '</textarea>';
+                $returning .= '<textarea rows="4" label="message" id="' . esc_attr( $id ) . '" name="' . esc_attr( $name ) . '"' . $error . '>' . qpp_inert_shortcodes( esc_textarea( stripslashes( $v ) ) ) . '</textarea>';
                 break;
         }
     }

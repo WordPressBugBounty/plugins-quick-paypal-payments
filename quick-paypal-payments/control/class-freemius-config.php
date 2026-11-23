@@ -75,6 +75,13 @@ class Freemius_Config {
          * screens. The filter takes a path on disk, not a URL.
          */
         $quick_paypal_payments_fs->add_filter( 'plugin_icon', array($this, '_fs_plugin_icon') );
+        /*
+         * With navigation set to tabs, the account template prints its own tab bar
+         * (with Account in it) whenever Freemius has stored none from the settings
+         * page, and the Freemius tabs script then appends Account to that same bar,
+         * so the Account page showed Account twice. Same fix as DEE-318.
+         */
+        $quick_paypal_payments_fs->add_filter( 'hide_account_tabs', '__return_true' );
         return $quick_paypal_payments_fs;
     }
 
