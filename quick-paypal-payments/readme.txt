@@ -4,7 +4,7 @@ Tags: paypal button, paypal, paypal payment form, donation, buy now button
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 6.0.6
+Stable tag: 6.0.7
 License: 	GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -166,6 +166,9 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 [Change Log](https://fullworksplugins.com/docs/quick-paypal-payments/installation-quick-paypal-payments/change-log-qpp/)
 
 == Upgrade Notice ==
+
+= 6.0.7 =
+Security release. Update now. A form whose amount is set from a PHP theme template stops taking payment until it is allowed with the qpp_shortcode_attributes_offered filter; see the changelog for this and other changes.
 
 = 6.0.6 =
 Security release. Update now.

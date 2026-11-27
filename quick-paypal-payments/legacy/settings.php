@@ -1217,7 +1217,7 @@ function qpp_form_options(  $id  ) {
     <p>' . esc_html__( 'Below form title:', 'quick-paypal-payments' ) . ' <input type="radio" label="paypal-location" name="paypal-location" value="imageabove"' . esc_attr( $imageabove ) . ' /> ' . esc_html__( 'Below Submit Button:', 'quick-paypal-payments' ) . '&nbsp;
     <input type="radio" label="paypal-location" name="paypal-location" value="imagebelow"' . esc_attr( $imagebelow ) . ' /></p>
     <p>
-    <input id="qpp_upload_image" type="text" name="paypal-url" value="' . esc_attr( $qpp['paypal-url'] ) . '" />
+    <input id="qpp_upload_image" class="qpp-media-url" type="text" name="paypal-url" value="' . esc_attr( $qpp['paypal-url'] ) . '" />
     <input class="button qpp-media-pick" type="button" data-target="#qpp_upload_image" data-title="' . esc_attr__( 'Image above or below the form', 'quick-paypal-payments' ) . '" value="' . esc_attr__( 'Choose image', 'quick-paypal-payments' ) . '" />
     </p>
     <p><input type="submit" name="qpp_submit" class="button-primary" style="color: #FFF;" value="' . esc_attr__( 'Save Changes', 'quick-paypal-payments' ) . '" /> <input type="submit" name="Reset" class="button-primary" style="color: #FFF;" value="' . esc_attr__( 'Reset', 'quick-paypal-payments' ) . '" onclick="return window.confirm( \'' . esc_js( __( 'Are you sure you want to reset the form settings?', 'quick-paypal-payments' ) ) . '\' );"/></p>
@@ -1387,7 +1387,7 @@ function qpp_styles(  $id  ) {
     </tr>
     <tr><td>' . esc_html__( 'Background', 'quick-paypal-payments' ) . '<br>' . esc_html__( 'Image:', 'quick-paypal-payments' ) . '</td>
     <td>
-    <input id="qpp_background_image" type="text" name="backgroundimage" value="' . esc_attr( $style['backgroundimage'] ) . '" />
+    <input id="qpp_background_image" class="qpp-media-url" type="text" name="backgroundimage" value="' . esc_attr( $style['backgroundimage'] ) . '" />
     <input class="button qpp-media-pick" type="button" data-target="#qpp_background_image" data-title="' . esc_attr__( 'Background image', 'quick-paypal-payments' ) . '" value="' . esc_attr__( 'Choose image', 'quick-paypal-payments' ) . '" /></td>
     </tr>
     <tr><td colspan="2"><h2>' . esc_html__( 'Font Styles', 'quick-paypal-payments' ) . '</h2></td>
@@ -2200,8 +2200,23 @@ function qpp_autoresponce_page(  $id  ) {
         $auto = array();
         foreach ( $options as $item ) {
             // An unticked checkbox is absent from the post, which means off.
-            $auto[$item] = ( isset( $_POST[$item] ) ? stripslashes( $_POST[$item] ) : '' );
+            $auto[$item] = ( isset( $_POST[$item] ) ? wp_unslash( $_POST[$item] ) : '' );
+            $auto[$item] = ( is_string( $auto[$item] ) ? $auto[$item] : '' );
         }
+        // The message is HTML mail; only a user trusted with unfiltered HTML may store any.
+        if ( !current_user_can( 'unfiltered_html' ) ) {
+            $auto['message'] = wp_kses_post( $auto['message'] );
+        }
+        foreach ( array(
+            'enable',
+            'whenconfirm',
+            'fromname',
+            'subject',
+            'paymentdetails'
+        ) as $item ) {
+            $auto[$item] = sanitize_text_field( $auto[$item] );
+        }
+        $auto['fromemail'] = sanitize_email( $auto['fromemail'] );
         update_option( 'qpp_autoresponder' . $id, $auto );
         if ( $id ) {
             /* translators: %s: form name. */
@@ -2776,10 +2791,10 @@ function qpp_generate_csv() {
                 'response' => 403,
             ) );
         }
-        $id = $_POST['formname'];
-        $filename = urlencode( $id . '.csv' );
+        $id = ( isset( $_POST['formname'] ) ? qpp_sanitize_form_name( sanitize_text_field( wp_unslash( $_POST['formname'] ) ) ) : '' );
+        $filename = $id . '.csv';
         if ( $id == '' ) {
-            $filename = urlencode( 'default.csv' );
+            $filename = 'default.csv';
         }
         header( 'Content-Description: File Transfer' );
         header( 'Content-Disposition: attachment; filename="' . $filename . '"' );
@@ -2847,9 +2862,10 @@ function qpp_generate_csv() {
         array_push( $headerrow, 'Paid' );
         fputcsv(
             $outstream,
-            $headerrow,
+            qpp_csv_row( $headerrow ),
             ',',
-            '"'
+            '"',
+            '\\'
         );
         foreach ( array_reverse( $message ) as $value ) {
             /*
@@ -2928,9 +2944,10 @@ function qpp_generate_csv() {
             array_push( $cells, ( $value['field18'] == 'Paid' ? 'Paid' : '' ) );
             fputcsv(
                 $outstream,
-                $cells,
+                qpp_csv_row( $cells ),
                 ',',
-                '"'
+                '"',
+                '\\'
             );
         }
         // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- Closing the PHP output stream for a CSV download, not a filesystem write.

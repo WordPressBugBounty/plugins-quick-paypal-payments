@@ -60,6 +60,8 @@ class Admin {
         add_action( 'admin_notices', array($this, 'review_prompt_notice'), 20 );
         add_action( 'wp_ajax_qpp_review_prompt', array($this, 'review_prompt_answer') );
         add_action( 'admin_post_qpp_review_prompt', array($this, 'review_prompt_answer') );
+        add_action( 'admin_notices', array($this, 'ipn_log_notice') );
+        add_action( 'admin_post_qpp_dismiss_ipn_log_notice', array($this, 'ipn_log_notice_dismiss') );
         add_action( 'init', array($this, 'generate_freemius_licence') );
         /*
          * qpp_legacy_free used to be written here on every admin page load. It has
@@ -369,6 +371,28 @@ https://fullworks.net/account/</a> to get your download and licence key
                 'state' => $state['state'],
             ) );
         }
+        wp_safe_redirect( ( wp_get_referer() ? wp_get_referer() : admin_url() ) );
+        exit;
+    }
+
+    /**
+     * The IPN debug log reminder. See legacy/ipn-log-notice.php.
+     */
+    public function ipn_log_notice() {
+        echo wp_kses_post( qpp_ipn_log_notice( qpp_ipn_log_configured_paths() ) );
+    }
+
+    /**
+     * Stores an administrator's dismissal of the IPN debug log reminder.
+     */
+    public function ipn_log_notice_dismiss() {
+        if ( !current_user_can( 'manage_options' ) ) {
+            wp_die( esc_html__( 'You do not have permission to do that.', 'quick-paypal-payments' ), '', array(
+                'response' => 403,
+            ) );
+        }
+        check_admin_referer( 'qpp_dismiss_ipn_log_notice' );
+        qpp_ipn_log_notice_dismiss( qpp_ipn_log_configured_paths() );
         wp_safe_redirect( ( wp_get_referer() ? wp_get_referer() : admin_url() ) );
         exit;
     }

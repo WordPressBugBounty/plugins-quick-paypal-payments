@@ -6,11 +6,31 @@ jQuery(document).ready(function ($) {
      */
     var frames = {};
 
+    /*
+     * The field a button fills, named by its data-target as "#id". Looked up by
+     * id and accepted only when it is one of the image URL fields, so the
+     * attribute is only ever an id, never a selector or markup.
+     */
+    function mediaField(target) {
+        if ('string' !== typeof target || '#' !== target.charAt(0)) {
+            return null;
+        }
+        var field = document.getElementById(target.slice(1));
+        if (!field || !$(field).is('input.qpp-media-url')) {
+            return null;
+        }
+        return $(field);
+    }
+
     $(document).on('click', '.qpp-media-pick', function (e) {
         e.preventDefault();
 
         var button = $(this);
-        var key = button.data('target');
+        var key = button.attr('data-target');
+
+        if (!mediaField(key)) {
+            return;
+        }
 
         if (!frames[key]) {
             frames[key] = wp.media({
@@ -22,7 +42,10 @@ jQuery(document).ready(function ($) {
 
             frames[key].on('select', function () {
                 var attachment = frames[key].state().get('selection').first().toJSON();
-                $(key).val(attachment.url).trigger('change');
+                var field = mediaField(key);
+                if (field) {
+                    field.val(attachment.url).trigger('change');
+                }
             });
         }
 
@@ -38,7 +61,11 @@ jQuery(document).ready(function ($) {
 
         var button = $(this);
 
-        $(button.data('target')).val(button.data('value')).trigger('change');
+        var field = mediaField(button.attr('data-target'));
+
+        if (field) {
+            field.val(String(button.attr('data-value') || '')).trigger('change');
+        }
     });
 
     // Keep the preview and the highlighted choice in step however the value

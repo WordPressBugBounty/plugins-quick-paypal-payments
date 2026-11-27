@@ -50,7 +50,7 @@ function qpp_mark_orders_paid( $messages, $selected ) {
 		}
 		// Already settled, by IPN or by hand. Not an error, but not a change
 		// either, so it must not inflate the count the notice reports back.
-		if ( isset( $messages[ $index ]['field18'] ) && 'Paid' === $messages[ $index ]['field18'] ) {
+		if ( qpp_order_is_paid( $messages[ $index ] ) ) {
 			continue;
 		}
 		$messages[ $index ] = qpp_settle_order( $messages[ $index ], 'manual' );
@@ -88,6 +88,49 @@ function qpp_settle_order( $row, $via ) {
 	$row['paidvia'] = (string) $via;
 
 	return $row;
+}
+
+/**
+ * Whether a stored order row has been settled.
+ *
+ * A settled row keeps 'Paid' where its order token was, so the same marker is
+ * also the one value that must never be accepted as a token.
+ *
+ * @param array|mixed $row Stored payment row.
+ *
+ * @return bool
+ */
+function qpp_order_is_paid( $row ) {
+	return is_array( $row ) && isset( $row['field18'] ) && qpp_is_paid_marker( $row['field18'] );
+}
+
+/**
+ * The index of the unpaid order row holding a token, or false.
+ *
+ * @param array  $messages Stored payment rows.
+ * @param string $custom   Order token.
+ *
+ * @return int|false
+ */
+function qpp_find_unpaid_order( $messages, $custom ) {
+	foreach ( $messages as $index => $row ) {
+		if ( is_array( $row ) && isset( $row['field18'] ) && $row['field18'] === $custom && ! qpp_order_is_paid( $row ) ) {
+			return $index;
+		}
+	}
+
+	return false;
+}
+
+/**
+ * Whether a value is the settled marker, however it is cased or padded.
+ *
+ * @param mixed $value Token or field value.
+ *
+ * @return bool
+ */
+function qpp_is_paid_marker( $value ) {
+	return is_scalar( $value ) && 0 === strcasecmp( trim( (string) $value ), 'Paid' );
 }
 
 /**
@@ -223,4 +266,17 @@ function qpp_selected_payment_rows( $post, $count ) {
 	}
 
 	return $selected;
+}
+
+/**
+ * The lines of a stored reference. A form with several products stores one
+ * "name x quantity" line per item, each ended by "</br>"; any other reference
+ * is a single line. Escape each line where it is printed.
+ *
+ * @param mixed $reference Stored reference.
+ *
+ * @return string[]
+ */
+function qpp_reference_lines( $reference ) {
+	return array_values( array_filter( array_map( 'trim', explode( '</br>', (string) $reference ) ), 'strlen' ) );
 }

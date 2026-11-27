@@ -1,4 +1,32 @@
 == Changelog ==
+= 6.0.7 =
+* Security: improved security
+* Thanks to Wordfence for a security report through the Wordfence Bug Bounty Program.
+* Changed: the public payments report ([qppreport]) no longer lists email addresses, postal addresses, phone numbers or coupon codes. It still lists each order's reference, quantity, amount and other non-personal columns.
+* Changed: when a form has no thanks or cancel page set, PayPal and Stripe send the buyer back to the page holding the form, without any query string it was opened with, or to the home page if that page is not known.
+* Changed: the payment form refuses an email address unless it is a single valid address, and shows the email field's error.
+* Changed: the IPN debug log (QPP_IPN_DEBUG_LOG_FILE or IPN_DEBUG_LOG_FILE) records only each transaction's id, type, status, amount and currency, and is written only to an absolute path outside the WordPress folder and wp-content. A log file set up under an earlier version may hold more than that; delete it once you no longer need it.
+* Added: while a file named by QPP_IPN_DEBUG_LOG_FILE or IPN_DEBUG_LOG_FILE exists, administrators see a reminder on the Dashboard and the plugin's screens to delete it when no longer needed and to remove the constant when debugging is finished. Each administrator can dismiss it.
+* Changed: the CSV export writes a value that begins with =, +, - or @ as text, with a leading apostrophe, unless it is a number or phone number.
+* Changed: the account creation role list offers only roles that cannot publish, upload files, edit other people's posts, post unfiltered HTML or manage the site. A form set to such a role creates subscribers until you choose another role.
+* Changed: on the Auto Responder screen, a user who cannot post unfiltered HTML (such as a multisite site administrator) has the message saved with the HTML allowed in posts.
+* Changed: coupon uses are counted when an order is paid, whether through PayPal, Stripe or marking it paid on the Payment Records screen, rather than when the form is submitted. A site that does not store payment records still counts the use at submission.
+* Changed: a form whose amount, reference, stock or labels are set in its shortcode or block takes payment only while a published page, widget, reusable block or block template still carries that shortcode or block with the same settings. A form that sets an amount from a PHP theme template can be allowed with the new qpp_shortcode_attributes_offered filter.
+* Changed: a ?form= link changes the form only on a page whose [qpp] shortcode or block sets nothing else. A shortcode or block with its own settings keeps its own form.
+* Changed: on a form with several products, quantities must be whole numbers.
+* Changed: a coupon worth the whole order is refused, and the buyer is asked to contact you.
+* Changed: new subscriptions bill the whole order amount each period, including the quantity, postage and any coupon, and a recurring form with several products is sent to PayPal as one item. Existing subscriptions keep the terms they were set up with.
+* Changed: a recurring payment is marked paid when PayPal confirms the subscription, rather than on its first payment.
+* Fixed: an order with a percentage coupon on more than one item now records the total PayPal charges, so its payment is marked paid instead of staying pending.
+* Fixed: on a single-product form, a price raised through itemamount was charged but the lower price was recorded in Payment Records.
+* Fixed: an auto responder with no From name set was sent with a blank sender name. It now comes from the site name.
+* Fixed: an apostrophe or quote typed into the payment form was saved with a backslash in front of it, so it showed as O\'Brien in Payment Records and the emailed list.
+* Fixed: a Quick PayPal Payments widget added but never saved showed PHP warnings on the page.
+* Fixed: an order on a form with several products wrote PHP warnings to the debug log.
+* Fixed: on a form with several products, the auto responder's [reference] showed "</br>" between items and the Stripe checkout page showed it in the item name. Each item now has its own line, or is separated by a comma at Stripe.
+* Fixed: the auto responder and payment notification sent when PayPal confirms a payment on a form with several products listed no items. They now list each item and its quantity.
+* Fixed: on PHP 8.4 and later the CSV export logged a deprecation notice, which could appear inside the downloaded file.
+
 = 6.0.6 =
 * Security: improved security
 * Thanks to Patchstack for a security report through the Patchstack Vulnerability Disclosure Program.

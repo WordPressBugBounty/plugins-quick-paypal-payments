@@ -112,15 +112,18 @@ function qpp_show_messages(  $id  ) {
     }
     if ( isset( $_POST['Submit'] ) ) {
         check_admin_referer( 'qpp_payments_form', 'qpp_payments_form_nonce' );
-        $options = array(
-            'messageqty',
-            'messageorder',
-            'hidepaid',
-            'showaddress'
+        $allowed = array(
+            'messageqty'   => array('fifty', 'hundred', 'all'),
+            'messageorder' => array('oldest', 'newest'),
+            'hidepaid'     => array('', 'checked'),
+            'showaddress'  => array('', 'checked'),
         );
-        foreach ( $options as $item ) {
+        foreach ( $allowed as $item => $values ) {
             if ( isset( $_POST[$item] ) ) {
-                $messageoptions[$item] = stripslashes( sanitize_text_field( $_POST[$item] ) );
+                $posted = sanitize_text_field( wp_unslash( $_POST[$item] ) );
+                if ( in_array( $posted, $values, true ) ) {
+                    $messageoptions[$item] = $posted;
+                }
             }
         }
         $messageoptions = qpp_merge_msg( $messageoptions );
@@ -142,6 +145,9 @@ function qpp_show_messages(  $id  ) {
              * there is no listener, so this is the only route an order has to being
              * paid at all.
              */
+            foreach ( $result['settled'] as $index ) {
+                qpp_check_coupon( qpp_get_element( $result['messages'][$index], 'field6' ), $id );
+            }
             $send = qpp_get_stored_send( $id );
             if ( qpp_should_create_user( $send, 'afterpayment' ) ) {
                 foreach ( $result['settled'] as $index ) {
@@ -166,9 +172,12 @@ function qpp_show_messages(  $id  ) {
     }
     if ( isset( $_POST['qpp_delete_selected'] ) ) {
         check_admin_referer( 'qpp_download_form', 'qpp_download_form_nonce' );
-        $id = sanitize_text_field( $_POST['formname'] );
+        $id = sanitize_text_field( wp_unslash( $_POST['formname'] ) );
         $message = get_option( 'qpp_messages' . $id );
-        if ( $message !== false ) {
+        if ( !is_array( $message ) ) {
+            $message = array();
+        }
+        if ( $message ) {
             $count = count( $message );
             for ($i = 0; $i <= $count; $i++) {
                 if ( isset( $_POST[$i] ) && 'checked' === sanitize_text_field( wp_unslash( $_POST[$i] ) ) ) {
@@ -193,8 +202,11 @@ function qpp_show_messages(  $id  ) {
     if ( $messageoptions['messageqty'] == 'hundred' ) {
         $showthismany = '100';
     }
-    ${$messageoptions['messageqty']} = "checked";
-    ${$messageoptions['messageorder']} = "checked";
+    $fifty = ( 'fifty' === $messageoptions['messageqty'] ? 'checked' : '' );
+    $hundred = ( 'hundred' === $messageoptions['messageqty'] ? 'checked' : '' );
+    $all = ( 'all' === $messageoptions['messageqty'] ? 'checked' : '' );
+    $oldest = ( 'oldest' === $messageoptions['messageorder'] ? 'checked' : '' );
+    $newest = ( 'newest' === $messageoptions['messageorder'] ? 'checked' : '' );
     $dashboard = '<form method="post" action="">';
     $dashboard .= wp_nonce_field(
         'qpp_payments_form',
@@ -202,7 +214,7 @@ function qpp_show_messages(  $id  ) {
         true,
         false
     );
-    $dashboard .= '<p><b>' . esc_html__( 'Show', 'quick-paypal-payments' ) . '</b> <input style="margin:0; padding:0; border:none;" type="radio" name="messageqty" value="fifty" "' . esc_attr( $fifty ) . ' /> 50 
+    $dashboard .= '<p><b>' . esc_html__( 'Show', 'quick-paypal-payments' ) . '</b> <input style="margin:0; padding:0; border:none;" type="radio" name="messageqty" value="fifty" ' . esc_attr( $fifty ) . ' /> 50 
     <input style="margin:0; padding:0; border:none;" type="radio" name="messageqty" value="hundred" ' . esc_attr( $hundred ) . ' /> 100 
     <input style="margin:0; padding:0; border:none;" type="radio" name="messageqty" value="all" ' . esc_attr( $all ) . ' /> ' . esc_html__( 'all messages.', 'quick-paypal-payments' ) . '&nbsp;&nbsp;
     <b>' . esc_html__( 'List', 'quick-paypal-payments' ) . '</b> <input style="margin:0; padding:0; border:none;" type="radio" name="messageorder" value="oldest" ' . esc_attr( $oldest ) . ' /> ' . esc_html__( 'oldest first', 'quick-paypal-payments' ) . ' 

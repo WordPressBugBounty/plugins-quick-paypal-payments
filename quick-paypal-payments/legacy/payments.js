@@ -157,7 +157,8 @@ function handleValidationResponse(e,f) {
 
 				// Invoke submit
 				container = $('<div style="display: none;" class="hidden-form"></div>');
-				container.append($(data.html).find('form'));
+				// Parsed into a detached document, so nothing in it runs until the form is placed.
+				container.append($($.parseHTML(data.html, null, false)).find('form'));
 				f.append(container);
 
 				f.find('.hidden-form form').submit();

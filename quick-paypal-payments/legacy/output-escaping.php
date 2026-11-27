@@ -77,3 +77,21 @@ function qpp_esc_visitor_html( $value ) {
 function qpp_esc_visitor_attr( $value ) {
 	return qpp_inert_shortcodes( esc_attr( (string) $value ) );
 }
+
+/**
+ * A value a link supplies to prefill the form, cleaned as it is read.
+ *
+ * Square brackets have no place in a reference, an amount, an item number or a
+ * coupon code, so they are dropped here as well as escaped where the form is
+ * printed.
+ *
+ * @param mixed $value Value from the request, already unslashed.
+ * @return string
+ */
+function qpp_clean_prefill( $value ) {
+	if ( ! is_scalar( $value ) ) {
+		return '';
+	}
+
+	return str_replace( array( '[', ']' ), '', sanitize_text_field( (string) $value ) );
+}

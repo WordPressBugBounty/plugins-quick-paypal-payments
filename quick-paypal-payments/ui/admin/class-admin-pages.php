@@ -112,7 +112,7 @@ class Admin_Pages {
                 });
 // confirm before reset
                 $('#delete-action input').on('click', function () {
-                    return confirm('<?php echo wp_kses_post( $confmsg ); ?>');
+                    return confirm('<?php echo esc_js( $confmsg ); ?>');
                 });
             });
             //]]>

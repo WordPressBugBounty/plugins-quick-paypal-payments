@@ -4086,3 +4086,18 @@ msgstr "Nicht mehr fragen"
 #: ui/admin/class-admin.php
 msgid "You do not have permission to do that."
 msgstr "Sie haben keine Berechtigung dafür."
+
+#: legacy/ipn-log-notice.php:97
+msgid "Dismiss"
+msgstr "Ausblenden"
+
+#. translators: %1$s is the log file path, %2$s is the name of the wp-config.php constant.
+#: legacy/ipn-log-notice.php:90
+#, php-format
+msgid "Quick PayPal Payments: the IPN debug log at %1$s may contain buyers' personal data. Delete it if you no longer need it, and remove %2$s from wp-config.php when debugging is finished."
+msgstr "Quick PayPal Payments: Das IPN-Debug-Protokoll unter %1$s kann personenbezogene Daten von Käufern enthalten. Löschen Sie es, wenn Sie es nicht mehr benötigen, und entfernen Sie %2$s aus der wp-config.php, sobald die Fehlersuche abgeschlossen ist."
+
+#: legacy/quick-paypal-payments.php:257
+#: legacy/quick-paypal-payments.php:1029
+msgid "This coupon covers the whole amount, so there is nothing to pay. Please contact us."
+msgstr "Dieser Gutschein deckt den gesamten Betrag ab, es ist also nichts zu bezahlen. Bitte kontaktieren Sie uns."

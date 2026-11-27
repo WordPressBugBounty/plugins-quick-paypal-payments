@@ -13,9 +13,21 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
+ * Capabilities a role created from a public form may not carry.
+ *
+ * @return string[]
+ */
+function qpp_role_capabilities_refused() {
+	return array( 'manage_options', 'edit_others_posts', 'unfiltered_html', 'edit_users', 'promote_users', 'activate_plugins', 'publish_posts', 'publish_pages', 'upload_files' );
+}
+
+/**
  * The roles a payment form may be allowed to create.
  *
- * Administrator is deliberately absent. This creates an account from a form
+ * Administrator is deliberately absent, and so is any role that can edit other
+ * people's posts, post unfiltered HTML, manage the site, publish or upload. A
+ * published page is what lets a form's own price be honoured, so a role that
+ * publishes could set its own. This creates an account from a form
  * anyone on the internet can submit, and the username is whatever they typed in
  * the first name box, so an administrator here is a way to hand the site away.
  * Anything else the site has is offered, including roles added by other plugins,
@@ -29,6 +41,10 @@ function qpp_creatable_roles() {
 	if ( function_exists( 'get_editable_roles' ) ) {
 		foreach ( get_editable_roles() as $slug => $role ) {
 			if ( 'administrator' === $slug ) {
+				continue;
+			}
+			$caps = isset( $role['capabilities'] ) && is_array( $role['capabilities'] ) ? array_filter( $role['capabilities'] ) : array();
+			if ( array_intersect( qpp_role_capabilities_refused(), array_keys( $caps ) ) ) {
 				continue;
 			}
 			$roles[ $slug ] = isset( $role['name'] ) ? $role['name'] : $slug;
